@@ -18,14 +18,12 @@ WORKDIR /app
 # Copy JAR from builder stage
 COPY --from=builder /app/target/*.jar app.jar
 
-# Expose Spring Boot default port
-EXPOSE 8080
+# Railway provides PORT at runtime; default to 8080 locally
+ENV PORT=8080
+EXPOSE ${PORT}
 
-# Environment variables for database connection
-ENV SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/smart_traffic_db
-ENV SPRING_DATASOURCE_USERNAME=root
-ENV SPRING_DATASOURCE_PASSWORD=root123
+# Database config comes from Railway environment variables at runtime
 ENV SPRING_JPA_HIBERNATE_DDL_AUTO=update
 
-# Run the application
-ENTRYPOINT ["java", "-jar", "app.jar"]
+# Run the application with Railway's dynamic port
+ENTRYPOINT ["sh", "-c", "java -Dserver.port=${PORT} -jar app.jar"]
